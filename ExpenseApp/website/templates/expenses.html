@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Expenses</h1>
+    <form method="POST" action="{{ url_for('views.expenses') }}">
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" class="form-control" id="amount" name="amount" required>
+        </div>
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select class="form-control" id="category" name="category" required>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Expense</button>
+    </form>
+
+    <hr>
+
+    <h2>Expense List</h2>
+    {% if expenses %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense.amount }}</td>
+                        <td>{{ expense.category.name }}</td>
+                        <td>{{ expense.date_created.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteExpense({{ expense.id }})">Delete</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No expenses yet.</p>
+    {% endif %}
+
+    <script>
+        function deleteExpense(expenseId) {
+            if (confirm("Are you sure you want to delete this expense?")) {
+                fetch(`/expenses/delete/${expenseId}`, {
+                    method: "POST",
+                    body: JSON.stringify({ expenseId: expenseId }),
+                }).then((_res) => {
+                    window.location.href = "/expenses";
+                });
+            }
+        }
+    </script>
+{% endblock %}
